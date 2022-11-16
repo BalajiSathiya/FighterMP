@@ -54,22 +54,41 @@ background-color: red;
 height: 100px;
 width: 100px;
 flex-shrink: 0;
+
+display: flex;
+justify-content: center;
+align-items: center;
+`
+
+const Tie = styled.div`
+position: absolute;
+color: white;
+display: none;
+align-items: center;
+justify-content: center;
+top: 0;
+right: 0;
+left: 0;
+bottom: 0;
 `
 
 const HP = () => {
 
   return (
-    <Fdiv>
-      <Sdiv>
-      <Bdiv></Bdiv>
-      <Hdiv id="playerHP"></Hdiv>
-      </Sdiv>
-      <Tdiv></Tdiv>
-      <Sdiv>
-      <Hdiv2 id="player2HP"></Hdiv2>
-      <Bdiv></Bdiv>
-      </Sdiv>
-    </Fdiv>
+    <>
+      <Fdiv>
+        <Sdiv>
+        <Bdiv></Bdiv>
+        <Hdiv id="playerHP"></Hdiv>
+        </Sdiv>
+        <Tdiv id="timer"></Tdiv>
+        <Sdiv>
+        <Hdiv2 id="player2HP"></Hdiv2>
+        <Bdiv></Bdiv>
+        </Sdiv>
+      </Fdiv>
+      <Tie id="tie"></Tie>
+    </>
   );
 }
 

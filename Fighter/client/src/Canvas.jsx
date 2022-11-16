@@ -124,7 +124,34 @@ const game = (canvas, c) => {
     )
   }
 
+  function determineWinner({player, player2, timerID}) {
+    clearTimeout(timerID)
+    document.querySelector('#tie').style.display = 'flex'
+    if (player.health === player2.health) {
+      document.querySelector('#tie').innerHTML = 'Tie'
+    } else if (player.health > player2.health) {
+      document.querySelector('#tie').innerHTML = 'Player 1 Wins'
+    } else if (player.health < player2.health) {
+      document.querySelector('#tie').innerHTML = 'Player 2 Wins'
+    }
+  }
 
+
+
+  let timer = 30;
+  let timerID;
+  function decreaseTimer() {
+    if (timer > 0) {
+      timerID = setTimeout(decreaseTimer, 1000)
+      timer--;
+      document.querySelector('#timer').innerHTML = timer
+    }
+    if (timer === 0) {
+      determineWinner({player, player2})
+    }
+  }
+
+  decreaseTimer()
 
   function animate() {
     window.requestAnimationFrame(animate)
@@ -164,6 +191,10 @@ const game = (canvas, c) => {
       console.log('player2 struck')
       player.health -= 20
       document.querySelector('#playerHP').style.width = player.health + '%'
+    }
+
+    if (player.health <= 0 || player2.health <= 0) {
+      determineWinner({player, player2, timerID})
     }
   }
 
