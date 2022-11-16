@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from 'react';
-
+import Hp from './Health.jsx';
 
 
 const game = (canvas, c) => {
@@ -10,20 +10,42 @@ const game = (canvas, c) => {
   const gravity = 0.4;
 
   class Sprite {
-    constructor({position, velocity, lastKey}) {
+    constructor({position, velocity, color, offset}) {
       this.position = position
       this.velocity = velocity
+      this.width = 50
       this.height = 150
-      this.lastKey = lastKey
+      this.lastKey
+      this.attackBox = {
+        position: {
+          x: this.position.x,
+          y: this.position.y
+        },
+        offset,
+        width:  100,
+        height: 50
+      }
+      this.color = color
+      this.isAttacking
+      this.health = 100
     }
 
-    draw (color) {
-      c.fillStyle = color
-      c.fillRect(this.position.x, this.position.y, 50, this.height)
+    draw () {
+      //Sprite
+      c.fillStyle = this.color
+      c.fillRect(this.position.x, this.position.y, this.width, this.height)
+      //Weapon
+      // if (this.isAttacking) {
+        c.fillStyle = 'red'
+        c.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height)
+      // }
     }
 
-    update (color) {
-      this.draw(color)
+    update () {
+      this.draw()
+
+      this.attackBox.position.x = this.position.x + this.attackBox.offset.x
+      this.attackBox.position.y = this.position.y
 
       this.position.x += this.velocity.x
       this.position.y += this.velocity.y
@@ -31,6 +53,14 @@ const game = (canvas, c) => {
       if (this.position.y + this.height + this.velocity.y >= canvas.height) {
         this.velocity.y = 0
       } else this.velocity.y += gravity
+    }
+
+    //Attack Method
+    shortAttack () {
+      this.isAttacking = true
+      setTimeout(() => {
+        this.isAttacking = false
+      }, 100)
     }
   }
 
@@ -46,6 +76,11 @@ const game = (canvas, c) => {
     velocity: {
       x: 0,
       y: 0
+    },
+    color: 'blue',
+    offset: {
+      x: 0,
+      y: 0
     }
   })
 
@@ -56,6 +91,11 @@ const game = (canvas, c) => {
     },
     velocity: {
       x: 0,
+      y: 0
+    },
+    color: 'green',
+    offset: {
+      x: -50,
       y: 0
     }
   })
@@ -73,6 +113,15 @@ const game = (canvas, c) => {
     ArrowLeft: {
       pressed: false
     },
+  }
+
+  function retangleCollision({rectangle, rectangle2}) {
+    return (
+        rectangle.attackBox.position.x + rectangle.attackBox.width >= rectangle2.position.x &&
+        rectangle.attackBox.position.x <= rectangle2.position.x + rectangle2.width &&
+        rectangle.attackBox.position.y + rectangle.attackBox.height >= rectangle2.position.y &&
+        rectangle.attackBox.position.y <= rectangle2.position.y + rectangle2.height
+    )
   }
 
 
@@ -99,6 +148,23 @@ const game = (canvas, c) => {
     } else if (keys.ArrowRight.pressed && player2.lastKey === 'ArrowRight') {
       player2.velocity.x = 5
     }
+
+    //Collision
+    //Player 1 is attacking
+    if (retangleCollision({rectangle: player, rectangle2: player2}) && player.isAttacking) {
+        player.isAttacking = false
+        console.log('player1 struck')
+        player2.health -= 20
+        document.querySelector('#player2HP').style.width = player2.health + '%'
+    }
+
+    //Player 2 is attacking
+    if (retangleCollision({rectangle: player2, rectangle2: player}) && player2.isAttacking) {
+      player2.isAttacking = false
+      console.log('player2 struck')
+      player.health -= 20
+      document.querySelector('#playerHP').style.width = player.health + '%'
+    }
   }
 
   animate();
@@ -117,6 +183,9 @@ const game = (canvas, c) => {
       case 'w':
         player.velocity.y = -15
         break;
+      case 'j':
+        player.shortAttack();
+        break;
       case 'ArrowRight':
         keys.ArrowRight.pressed = true;
         player2.lastKey = 'ArrowRight'
@@ -127,6 +196,9 @@ const game = (canvas, c) => {
         break;
       case 'ArrowUp':
         player2.velocity.y = -15
+        break;
+      case 'PageDown':
+        player2.shortAttack();
         break;
     }
   })
@@ -155,8 +227,6 @@ const Canvas = props => {
 
   const canvasRef = useRef(null)
 
-
-
   useEffect(() => {
     const canvas = canvasRef.current
     const context = canvas.getContext('2d')
@@ -164,7 +234,12 @@ const Canvas = props => {
     game(canvas, context)
   }, [game])
 
-  return <canvas ref={canvasRef} {...props}/>
+  return (
+    <div>
+      <canvas ref={canvasRef} {...props}/>
+      <Hp />
+    </div>
+  )
 }
 
 export default Canvas;

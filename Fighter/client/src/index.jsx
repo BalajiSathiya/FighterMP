@@ -6,13 +6,19 @@ import { io } from "socket.io-client";
 import Canvas from './Canvas.jsx'
 
 const Cdiv = styled.div`
-height: 100%;
-width: 100%;
+margin-top: 30px;
+position: relative;
 display: flex;
 flex-direction: row;
 justify-content: center;
 align-items: center;
 `;
+
+const HPdiv = styled.div`
+background-color: yellow;
+height: 30px;
+width: 100px;
+`
 
 const App = () => {
 
