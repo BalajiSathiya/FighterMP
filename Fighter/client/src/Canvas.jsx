@@ -1,5 +1,11 @@
 import React, { useRef, useEffect } from 'react';
+
 import Hp from './Health.jsx';
+import {Sprite, Fighter} from './js/Classes.js'
+import {rectangleCollision, determineWinner, decreaseTimer} from './js/Utility.js'
+
+import Background from './assets/background.png'
+import Shop from './assets/shop.png'
 
 
 const game = (canvas, c) => {
@@ -9,69 +15,32 @@ const game = (canvas, c) => {
 
   const gravity = 0.4;
 
-  class Sprite {
-    constructor({position, velocity, color, offset}) {
-      this.position = position
-      this.velocity = velocity
-      this.width = 50
-      this.height = 150
-      this.lastKey
-      this.attackBox = {
-        position: {
-          x: this.position.x,
-          y: this.position.y
-        },
-        offset,
-        width:  100,
-        height: 50
-      }
-      this.color = color
-      this.isAttacking
-      this.health = 100
-    }
-
-    draw () {
-      //Sprite
-      c.fillStyle = this.color
-      c.fillRect(this.position.x, this.position.y, this.width, this.height)
-      //Weapon
-      // if (this.isAttacking) {
-        c.fillStyle = 'red'
-        c.fillRect(this.attackBox.position.x, this.attackBox.position.y, this.attackBox.width, this.attackBox.height)
-      // }
-    }
-
-    update () {
-      this.draw()
-
-      this.attackBox.position.x = this.position.x + this.attackBox.offset.x
-      this.attackBox.position.y = this.position.y
-
-      this.position.x += this.velocity.x
-      this.position.y += this.velocity.y
-
-      if (this.position.y + this.height + this.velocity.y >= canvas.height) {
-        this.velocity.y = 0
-      } else this.velocity.y += gravity
-    }
-
-    //Attack Method
-    shortAttack () {
-      this.isAttacking = true
-      setTimeout(() => {
-        this.isAttacking = false
-      }, 100)
-    }
-  }
-
-
-
   c.fillRect(0, 0, canvas.width, canvas.height)
 
-  const player = new Sprite({
+  const background = new Sprite({
     position: {
       x: 0,
       y: 0
+    },
+    imageSrc: Background,
+    c
+  })
+
+  const shop = new Sprite({
+    position: {
+      x: 630,
+      y: 120
+    },
+    imageSrc: Shop,
+    c,
+    scale: 2.8,
+    frame: 6
+  })
+
+  const player = new Fighter({
+    position: {
+      x: 100,
+      y: 50
     },
     velocity: {
       x: 0,
@@ -81,13 +50,14 @@ const game = (canvas, c) => {
     offset: {
       x: 0,
       y: 0
-    }
+    },
+    c
   })
 
-  const player2 = new Sprite({
+  const player2 = new Fighter({
     position: {
-      x: 400,
-      y: 100
+      x: 850,
+      y: 50
     },
     velocity: {
       x: 0,
@@ -97,7 +67,8 @@ const game = (canvas, c) => {
     offset: {
       x: -50,
       y: 0
-    }
+    },
+    c
   })
 
   const keys = {
@@ -115,48 +86,17 @@ const game = (canvas, c) => {
     },
   }
 
-  function retangleCollision({rectangle, rectangle2}) {
-    return (
-        rectangle.attackBox.position.x + rectangle.attackBox.width >= rectangle2.position.x &&
-        rectangle.attackBox.position.x <= rectangle2.position.x + rectangle2.width &&
-        rectangle.attackBox.position.y + rectangle.attackBox.height >= rectangle2.position.y &&
-        rectangle.attackBox.position.y <= rectangle2.position.y + rectangle2.height
-    )
-  }
-
-  function determineWinner({player, player2, timerID}) {
-    clearTimeout(timerID)
-    document.querySelector('#tie').style.display = 'flex'
-    if (player.health === player2.health) {
-      document.querySelector('#tie').innerHTML = 'Tie'
-    } else if (player.health > player2.health) {
-      document.querySelector('#tie').innerHTML = 'Player 1 Wins'
-    } else if (player.health < player2.health) {
-      document.querySelector('#tie').innerHTML = 'Player 2 Wins'
-    }
-  }
-
-
-
-  let timer = 30;
-  let timerID;
-  function decreaseTimer() {
-    if (timer > 0) {
-      timerID = setTimeout(decreaseTimer, 1000)
-      timer--;
-      document.querySelector('#timer').innerHTML = timer
-    }
-    if (timer === 0) {
-      determineWinner({player, player2})
-    }
-  }
-
-  decreaseTimer()
+  decreaseTimer(player, player2)
 
   function animate() {
     window.requestAnimationFrame(animate)
     c.fillStyle = 'black'
     c.fillRect(0, 0, canvas.width, canvas.height)
+
+    background.update()
+
+    shop.update()
+
     player.update('green')
     player2.update('blue')
 
@@ -178,7 +118,7 @@ const game = (canvas, c) => {
 
     //Collision
     //Player 1 is attacking
-    if (retangleCollision({rectangle: player, rectangle2: player2}) && player.isAttacking) {
+    if (rectangleCollision({rectangle: player, rectangle2: player2}) && player.isAttacking) {
         player.isAttacking = false
         console.log('player1 struck')
         player2.health -= 20
@@ -186,7 +126,7 @@ const game = (canvas, c) => {
     }
 
     //Player 2 is attacking
-    if (retangleCollision({rectangle: player2, rectangle2: player}) && player2.isAttacking) {
+    if (rectangleCollision({rectangle: player2, rectangle2: player}) && player2.isAttacking) {
       player2.isAttacking = false
       console.log('player2 struck')
       player.health -= 20
