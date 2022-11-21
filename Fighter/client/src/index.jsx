@@ -3,28 +3,38 @@ import ReactDOM from 'react-dom';
 import styled from 'styled-components';
 import { io } from "socket.io-client";
 
-import Canvas from './Canvas.jsx'
+import GlobalFonts from './fonts/fonts.js';
+
+import FP from './Load.jsx'
+import CanvasA from './CanvasA.jsx'
+import CanvasB from './CanvasB.jsx'
+import Chat from './Chat.jsx'
+
 
 const Cdiv = styled.div`
 margin-top: 30px;
 position: relative;
 display: flex;
-flex-direction: row;
+flex-direction: column;
 justify-content: center;
 align-items: center;
 `;
 
-const HPdiv = styled.div`
-background-color: yellow;
-height: 30px;
-width: 100px;
-`
 
 const App = () => {
 
+
+  const socket = io("http://localhost:4000")
+
+  socket.on("connect", () => {
+    console.log(`You connected with id: ${socket.id}`)
+  })
+
   return(
     <Cdiv>
-      <Canvas />
+      <GlobalFonts/>
+      <FP sock = {socket}/>
+      <CanvasA />
     </Cdiv>
   )
 

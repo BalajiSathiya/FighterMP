@@ -1,10 +1,34 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 
 import Hp from './Health.jsx';
 import {Sprite, Fighter} from './js/Classes.js'
 import {rectangleCollision, determineWinner, decreaseTimer} from './js/Utility.js'
 
 import { Background, Shop, SMDeath, SMA2, SMIdle, SMRun, SMTH, SMJump, SMFall, SMA1, KJump, KTH, KFall, KA1, KRun, KA2, KIdle, KDeath } from './assets/Assets.js'
+
+const Canvas = props => {
+
+  const [Show, setShow] = useState(true)
+  const canvasRef = useRef(null)
+
+  if(!Show) {
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    const context = canvas.getContext('2d')
+
+    game(canvas, context)
+  }, [game])
+
+    return (
+      <div>
+        <canvas ref={canvasRef} {...props}/>
+        <Hp />
+      </div>
+    )
+  } else return null;
+
+}
 
 
 const game = (canvas, c) => {
@@ -341,25 +365,6 @@ const game = (canvas, c) => {
     }
   })
 
-}
-
-const Canvas = props => {
-
-  const canvasRef = useRef(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    const context = canvas.getContext('2d')
-
-    game(canvas, context)
-  }, [game])
-
-  return (
-    <div>
-      <canvas ref={canvasRef} {...props}/>
-      <Hp />
-    </div>
-  )
 }
 
 export default Canvas;
